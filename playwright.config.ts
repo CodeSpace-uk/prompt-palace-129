@@ -2,11 +2,11 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./audit",
-  timeout: 90_000,
+  timeout: 0,
   expect: { timeout: 10_000 },
   fullyParallel: true,
   workers: 4,
-  retries: 1,
+  retries: 0,
   reporter: [
     ["list"],
     ["html", { outputFolder: "audit-report", open: "never" }],

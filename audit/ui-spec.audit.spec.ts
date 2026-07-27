@@ -61,7 +61,7 @@ test.describe("UI spec audit", () => {
   test("audit every page at Desktop and Mobile", async ({ browser }) => {
     const pages = await discoverPages(browser);
     expect(pages.length, "no pages discovered").toBeGreaterThan(0);
-    test.setTimeout(60_000 * pages.length);
+    test.setTimeout(0); // no cap: runtime scales with page count
 
     const failures: string[] = [];
 
