@@ -98,7 +98,7 @@ test.describe("UI spec audit", () => {
         try {
           await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45_000 });
           await page.waitForLoadState("load", { timeout: 20_000 }).catch(() => {});
-          await page.waitForTimeout(500);
+          await page.waitForTimeout(auditConfig.settleMs);
         } catch {
           rows.push({
             page: url,

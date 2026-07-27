@@ -59,6 +59,8 @@ export async function discoverPages(browser: Browser): Promise<string[]> {
 
     try {
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45_000 });
+      await page.waitForLoadState("load", { timeout: 20_000 }).catch(() => {});
+      await page.waitForTimeout(auditConfig.settleMs);
     } catch {
       continue;
     }

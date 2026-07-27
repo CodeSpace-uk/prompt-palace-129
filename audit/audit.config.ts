@@ -8,8 +8,15 @@ export type ViewName = "Desktop" | "Mobile";
 export interface UiSpec {
   /** Human-readable component name shown in the report. */
   component: string;
-  /** CSS selector for the element. First match wins. */
+  /** CSS selector for the element. */
   selector: string;
+  /**
+   * Which match to use among visible matches. 0 = first (default),
+   * -1 = last. Useful when header and footer share the same markup.
+   */
+  index?: number;
+  /** Alignment is measured inside the viewport (default) or the element's parent. */
+  alignmentContainer?: "viewport" | "parent";
   /** Must the element exist? Default true. */
   required?: boolean;
   /** Expected rendered width in CSS px (per view). */
@@ -37,6 +44,8 @@ export const auditConfig = {
   baseUrl: "https://pensionuk.aptia-group.com/aptia",
   /** Also try <origin>/sitemap.xml for page discovery. */
   useSitemap: true,
+  /** Ms to wait after load for SPA/hydrated content to render. */
+  settleMs: 4000,
   /** Max pages to audit. */
   maxPages: 40,
   /** Only crawl URLs whose pathname starts with one of these (empty = same origin). */
@@ -57,26 +66,30 @@ export const auditConfig = {
   specs: [
     {
       component: "Header Logo",
-      selector: "header img[src*='logo'], header .logo img, header img[alt*='Aptia' i]",
+      // First visible brand-sized image on the page (site renders no <header> tag).
+      selector: "img[src*='/document/'], header img, .logo img",
+      index: 0,
       width: { Desktop: 98, Mobile: 98 },
       alignment: { Desktop: "center", Mobile: "right" },
       href: "https://aptia-group.com/en-gb",
     },
     {
       component: "Footer Logo",
-      selector: "footer img[src*='logo'], footer .logo img, footer img[alt*='Aptia' i]",
+      // Last visible brand image on the page.
+      selector: "img[src*='/document/'], footer img, footer .logo img",
+      index: -1,
       width: { Desktop: 98, Mobile: 98 },
       alignment: { Desktop: "left", Mobile: "right" },
       href: null,
     },
     {
       component: "Privacy Notice",
-      selector: "footer a[href*='privacy']",
+      selector: "a[href*='privacy']",
       href: "https://aptia-group.com/en-gb/privacy-notice",
     },
     {
       component: "Cookie Notice",
-      selector: "footer a[href*='cookie']",
+      selector: "a[href*='cookie']",
       href: "https://aptia-group.com/en-gb/cookie-notice",
     },
   ] satisfies UiSpec[],
