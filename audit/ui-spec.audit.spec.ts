@@ -21,23 +21,42 @@ const rows: Row[] = [];
 /** Measured geometry + link for one spec on the current page. */
 async function measure(page: Page, spec: UiSpec) {
   return page.evaluate(
-    ({ selector }) => {
-      const el = document.querySelector(selector) as HTMLElement | null;
+    ({ selector, index, container }) => {
+      const all = [...document.querySelectorAll(selector)] as HTMLElement[];
+      const visible = all.filter((e) => {
+        const r = e.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      });
+      const pool = visible.length ? visible : all;
+      const i = index < 0 ? pool.length + index : index;
+      const el = pool[i];
       if (!el) return null;
+
       const r = el.getBoundingClientRect();
-      const parent = (el.offsetParent as HTMLElement | null) ?? document.body;
-      const pr = parent.getBoundingClientRect();
+      let cLeft = 0;
+      let cWidth = document.documentElement.clientWidth;
+      if (container === "parent") {
+        const parent = el.parentElement ?? document.body;
+        const pr = parent.getBoundingClientRect();
+        cLeft = pr.left;
+        cWidth = pr.width;
+      }
       const anchor = el.closest("a") as HTMLAnchorElement | null;
       return {
         width: Math.round(r.width),
-        left: r.left - pr.left,
-        right: pr.right - r.right,
-        parentWidth: pr.width,
-        href: anchor ? anchor.href : null,
+        left: r.left - cLeft,
+        right: cLeft + cWidth - r.right,
+        parentWidth: cWidth,
+        href: anchor && anchor.getAttribute("href") ? anchor.href : null,
         visible: r.width > 0 && r.height > 0,
       };
     },
-    { selector: spec.selector },
+    {
+      selector: spec.selector,
+      index: spec.index ?? 0,
+      container: spec.alignmentContainer ?? "viewport",
+    },
+
   );
 }
 
