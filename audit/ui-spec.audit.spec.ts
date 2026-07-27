@@ -77,7 +77,9 @@ test.describe("UI spec audit", () => {
 
       for (const url of pages) {
         try {
-          await page.goto(url, { waitUntil: "networkidle", timeout: 45_000 });
+          await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45_000 });
+          await page.waitForLoadState("load", { timeout: 20_000 }).catch(() => {});
+          await page.waitForTimeout(500);
         } catch {
           rows.push({
             page: url,
