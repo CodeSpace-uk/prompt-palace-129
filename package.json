@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "audit": "playwright test",
+    "audit": "playwright test; mkdir -p public/audit-report && cp audit-report/audit.json public/audit-report/audit.json",
     "audit:report": "playwright show-report audit-report"
   },
   "dependencies": {
