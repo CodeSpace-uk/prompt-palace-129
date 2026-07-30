@@ -10,7 +10,12 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "audit": "playwright test; mkdir -p public/audit-report && cp audit-report/audit.json public/audit-report/audit.json",
+    "audit": "playwright test; bun run audit:publish",
+    "audit:spec": "playwright test audit/ui-spec.audit.spec.ts; bun run audit:publish",
+    "audit:visual": "playwright test audit/visual.audit.spec.ts; bun run audit:publish",
+    "audit:visual:update": "playwright test audit/visual.audit.spec.ts --update-snapshots; bun run audit:publish",
+    "audit:interactions": "playwright test audit/interaction.audit.spec.ts; bun run audit:publish",
+    "audit:publish": "node audit/publish.mjs",
     "audit:report": "playwright show-report audit-report"
   },
   "dependencies": {
