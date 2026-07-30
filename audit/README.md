@@ -1,21 +1,31 @@
-# UI spec audit (Playwright)
+# UI audit suite (Playwright)
 
-Crawls every page of a site and asserts your UI specs at **Desktop** and **Mobile** viewports.
+Crawls every page of a site and runs three audits at **Desktop** and **Mobile** viewports:
+
+1. **Spec assertions** (`ui-spec.audit.spec.ts`) - presence, width, alignment, hyperlinks.
+2. **Visual regression** (`visual.audit.spec.ts`) - pixel snapshots vs. committed baselines.
+3. **SPA interactions** (`interaction.audit.spec.ts`) - mobile menu toggle, client-side route
+   transitions, shared-shell persistence, destination content.
 
 ## Run
 
 ```bash
-bun run audit          # run the audit
-bun run audit:report   # open the HTML report
+bun run audit                 # all three audits
+bun run audit:spec            # spec assertions only
+bun run audit:visual          # visual regression only
+bun run audit:visual:update   # accept current pixels as the new baseline
+bun run audit:interactions    # interaction tests only
+bun run audit:report          # open the HTML report
 ```
 
-Outputs land in `audit-report/`:
+Outputs land in `audit-report/` as `audit.*`, `visual.*`, `interactions.*`
+(`.md` table | `.csv` | `.json`), plus the Playwright HTML report with screenshots,
+diff images and traces. Every run republishes the merged rows to
+`public/audit-report/audit.json`, which feeds the live dashboard at `/`.
 
-- `audit.md` — the report table (Page URL | View | Component | Present | Width Correct | Alignment Correct | Hyperlink Status | Actual URL | Pass/Fail | Comments)
-- `audit.csv` / `audit.json` — same data for spreadsheets / tooling
-- Playwright HTML report with screenshots and traces for failures
+Baselines live in `audit/__screenshots__/` - commit them so diffs are meaningful.
 
-The test fails when any spec is violated, so it can gate CI.
+Each test fails when a check is violated, so the suite can gate CI.
 
 ## Configure
 
@@ -33,6 +43,13 @@ Everything lives in `audit/audit.config.ts`:
     default or the parent via `alignmentContainer: "parent"`, with `alignmentTolerance`
   - `href`: a URL (must link there), `null` (must NOT be hyperlinked), or omitted (not audited)
   - `required: false` to allow an element to be absent
+
+
+- `visual` - `enabled`, `fullPage`, `maxDiffPixelRatio`, `maskSelectors` (dynamic regions to hide),
+  `stabilizeCss` (kills animations before capture).
+- `interactions` - `mobileMenu.toggleSelector` / `panelSelector`, and
+  `routeTransitions.linksPerPage` / `persistentSelector` (the shared shell element that must
+  survive a route change).
 
 ## Note on browsers
 
