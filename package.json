@@ -16,7 +16,8 @@
     "audit:visual:update": "playwright test audit/visual.audit.spec.ts --update-snapshots; bun run audit:publish",
     "audit:interactions": "playwright test audit/interaction.audit.spec.ts; bun run audit:publish",
     "audit:publish": "node audit/publish.mjs",
-    "audit:report": "playwright show-report audit-report"
+    "audit:report": "playwright show-report audit-report",
+    "audit:journey": "playwright test audit/journey.audit.spec.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
