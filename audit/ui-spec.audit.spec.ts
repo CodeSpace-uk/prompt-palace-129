@@ -1,20 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
-import { mkdirSync, writeFileSync } from "node:fs";
 import { auditConfig, type UiSpec, type ViewName } from "./audit.config";
 import { discoverPages } from "./crawler";
-
-type Row = {
-  page: string;
-  view: ViewName;
-  component: string;
-  present: "Yes" | "No";
-  widthCorrect: string;
-  alignmentCorrect: string;
-  hyperlink: string;
-  actualUrl: string;
-  result: "Pass" | "Fail";
-  comments: string;
-};
+import { writeReport, type Row } from "./report";
 
 const rows: Row[] = [];
 
@@ -207,51 +194,7 @@ test.describe("UI spec audit", () => {
       await context.close();
     }
 
-    // Reports
-    mkdirSync("audit-report", { recursive: true });
-    const header = [
-      "Page URL",
-      "View",
-      "Component",
-      "Present",
-      "Width Correct",
-      "Alignment Correct",
-      "Hyperlink Status",
-      "Actual URL",
-      "Pass/Fail",
-      "Comments",
-    ];
-    const csv = [
-      header.join(","),
-      ...rows.map((r) =>
-        [
-          r.page,
-          r.view,
-          r.component,
-          r.present,
-          r.widthCorrect,
-          r.alignmentCorrect,
-          r.hyperlink,
-          r.actualUrl,
-          r.result,
-          r.comments,
-        ]
-          .map((v) => `"${String(v).replace(/"/g, '""')}"`)
-          .join(","),
-      ),
-    ].join("\n");
-    writeFileSync("audit-report/audit.csv", csv);
-
-    const md = [
-      `| ${header.join(" | ")} |`,
-      `| ${header.map(() => "---").join(" | ")} |`,
-      ...rows.map(
-        (r) =>
-          `| ${r.page} | ${r.view} | ${r.component} | ${r.present} | ${r.widthCorrect} | ${r.alignmentCorrect} | ${r.hyperlink} | ${r.actualUrl} | ${r.result} | ${r.comments} |`,
-      ),
-    ].join("\n");
-    writeFileSync("audit-report/audit.md", md);
-    writeFileSync("audit-report/audit.json", JSON.stringify(rows, null, 2));
+    writeReport("audit", rows);
 
     console.log(`\nAudited ${pages.length} pages x 2 views -> audit-report/audit.md`);
     for (const f of failures) console.log(`FAIL: ${f}`);
