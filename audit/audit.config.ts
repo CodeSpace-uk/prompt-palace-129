@@ -63,6 +63,40 @@ export const auditConfig = {
   userAgent:
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
 
+  /** Visual regression snapshots (audit/__screenshots__). */
+  visual: {
+    enabled: true,
+    /** Capture the whole scrollable page instead of just the viewport. */
+    fullPage: true,
+    /** Fraction of pixels allowed to differ before a snapshot fails. */
+    maxDiffPixelRatio: 0.02,
+    /** Elements hidden before capture (carousels, timestamps, cookie banners...). */
+    maskSelectors: ["iframe", "video", "[id*='cookie' i]", "[class*='cookie' i]"],
+    /** Extra CSS injected before capture (kills animations/caret flicker). */
+    stabilizeCss:
+      "*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}",
+  },
+
+  /** SPA interaction checks. */
+  interactions: {
+    enabled: true,
+    /** Mobile nav toggle. Tested at the Mobile viewport only. */
+    mobileMenu: {
+      toggleSelector:
+        "button[aria-label*='menu' i], button[class*='burger' i], button[class*='hamburger' i], [class*='navbar-toggle' i], [class*='menu-toggle' i]",
+      /** Panel expected to become visible after tapping the toggle. */
+      panelSelector: "nav, [class*='nav-menu' i], [class*='mobile-menu' i], [role='navigation']",
+    },
+    /** Click internal links and assert client-side routing (no full reload). */
+    routeTransitions: {
+      enabled: true,
+      /** Max internal links exercised per page. */
+      linksPerPage: 3,
+      /** Element that must survive a route change (shared shell). */
+      persistentSelector: "img[src*='/document/']",
+    },
+  },
+
   specs: [
     {
       component: "Header Logo",
