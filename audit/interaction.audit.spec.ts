@@ -97,30 +97,40 @@ test.describe("SPA interactions", () => {
         if (!interactions.routeTransitions.enabled) continue;
         const origin = new URL(url).origin;
         const targets = (
-          await page.$$eval("a[href]", (as) => as.map((a) => (a as HTMLAnchorElement).href))
+          await page.$$eval("a[href]", (as) =>
+            as.map((a, idx) => {
+              const el = a as HTMLAnchorElement;
+              const r = el.getBoundingClientRect();
+              return { href: el.href, idx, visible: r.width > 0 && r.height > 0 };
+            }),
+          )
         )
-          .filter((h) => {
+          .filter((t) => t.visible)
+          .filter((t) => {
             try {
-              const u = new URL(h);
-              return u.origin === origin && u.href.replace(/#.*$/, "") !== url;
+              const u = new URL(t.href);
+              return (
+                u.origin === origin && u.href.replace(/#.*$/, "").replace(/\/+$/, "") !== url.replace(/\/+$/, "")
+              );
             } catch {
               return false;
             }
           })
-          .filter((h, i, arr) => arr.indexOf(h) === i)
+          .filter((t, i, arr) => arr.findIndex((x) => x.href === t.href) === i)
           .slice(0, interactions.routeTransitions.linksPerPage);
 
-        for (const target of targets) {
+        for (const { href: target, idx } of targets) {
           await settle(page, url);
           // Marker survives client-side routing, dies on a full reload.
           await page.evaluate(() => {
             (window as unknown as { __spaMarker?: boolean }).__spaMarker = true;
           });
 
-          const link = page.locator(`a[href$="${new URL(target).pathname}"]`).first();
+          const link = page.locator("a[href]").nth(idx);
           let result: Row["result"] = "Pass";
           const notes: string[] = [];
           try {
+            await link.scrollIntoViewIfNeeded({ timeout: 5_000 }).catch(() => {});
             await link.click({ timeout: 10_000 });
             await page.waitForTimeout(interactions.routeTransitions.enabled ? 2500 : 0);
 
