@@ -131,7 +131,13 @@ test.describe("SPA interactions", () => {
           const notes: string[] = [];
           try {
             await link.scrollIntoViewIfNeeded({ timeout: 5_000 }).catch(() => {});
-            await link.click({ timeout: 10_000 });
+            try {
+              await link.click({ timeout: 8_000 });
+            } catch {
+              // Covered by an overlay / sticky bar: retry forcing the click.
+              notes.push("Normal click blocked (element obscured) - forced click");
+              await link.click({ timeout: 8_000, force: true });
+            }
             await page.waitForTimeout(interactions.routeTransitions.enabled ? 2500 : 0);
 
             const softNav = await page.evaluate(
