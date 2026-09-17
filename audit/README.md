@@ -16,7 +16,16 @@ bun run audit:visual          # visual regression only
 bun run audit:visual:update   # accept current pixels as the new baseline
 bun run audit:interactions    # interaction tests only
 bun run audit:report          # open the HTML report
+bun run audit:journey         # end-to-end member journey
 ```
+
+The journey spec supports environment overrides:
+
+- `JOURNEY_SUBMIT=1` — complete the final Submit and assert the thank-you page
+- `JOURNEY_SCHEME` — dummy scheme name (default `test`)
+- `JOURNEY_EMPLOYER` — dummy employer name (default `test`)
+
+Example: `JOURNEY_SCHEME=acme JOURNEY_EMPLOYER="Acme Ltd" bun run audit:journey`
 
 Outputs land in `audit-report/` as `audit.*`, `visual.*`, `interactions.*`
 (`.md` table | `.csv` | `.json`), plus the Playwright HTML report with screenshots,
